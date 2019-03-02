@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Midwolf.GamesFramework.Api/bin/Debug/netcoreapp2.2
+/Midwolf.GamesFramework.Api/obj
+/Midwolf.GamesFramework.CompetitionServices/bin/Debug/netcoreapp2.2
+/Midwolf.GamesFramework.CompetitionServices/obj
+/Midwolf.GamesFramework.Services/bin/Debug/netcoreapp2.2
+/Midwolf.GamesFramework.Services/obj

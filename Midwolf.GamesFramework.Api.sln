@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midwolf.GamesFramework.Api", "Midwolf.GamesFramework.Api\Midwolf.GamesFramework.Api.csproj", "{6B26F549-8B4F-4A64-AB96-D444682CD8F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Midwolf.GamesFramework.Services", "Midwolf.GamesFramework.Services\Midwolf.GamesFramework.Services.csproj", "{579C656F-82DD-4B6A-B1D1-87BCD46C7E5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Midwolf.GamesFramework.CompetitionServices", "Midwolf.GamesFramework.CompetitionServices\Midwolf.GamesFramework.CompetitionServices.csproj", "{32E64EBF-1E3E-460B-B0ED-0A8A2A1144CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B26F549-8B4F-4A64-AB96-D444682CD8F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B26F549-8B4F-4A64-AB96-D444682CD8F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B26F549-8B4F-4A64-AB96-D444682CD8F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B26F549-8B4F-4A64-AB96-D444682CD8F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{579C656F-82DD-4B6A-B1D1-87BCD46C7E5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{579C656F-82DD-4B6A-B1D1-87BCD46C7E5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{579C656F-82DD-4B6A-B1D1-87BCD46C7E5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{579C656F-82DD-4B6A-B1D1-87BCD46C7E5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32E64EBF-1E3E-460B-B0ED-0A8A2A1144CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32E64EBF-1E3E-460B-B0ED-0A8A2A1144CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32E64EBF-1E3E-460B-B0ED-0A8A2A1144CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32E64EBF-1E3E-460B-B0ED-0A8A2A1144CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F3261503-5F7C-43A6-A240-3F44677809B1}
+	EndGlobalSection
+EndGlobal
