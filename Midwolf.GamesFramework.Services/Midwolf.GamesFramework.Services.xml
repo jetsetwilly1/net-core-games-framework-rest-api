@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Midwolf.GamesFramework.Services</name>
+    </assembly>
+    <members>
+        <member name="T:Midwolf.GamesFramework.Services.Attributes.HasNestedValidationAttribute">
+            <summary>
+            Attribute class used to validate child properties.
+            </summary>
+            <remarks>
+            See: http://stackoverflow.com/questions/2493800/how-can-i-tell-the-data-annotations-validator-to-also-validate-complex-child-pro
+            Apparently the Data Annotations validator does not validate complex child properties.
+            To do so, slap this attribute on a your property (probably a nested view model) 
+            whose type has validation attributes on its properties.
+            This will validate until a nested <see cref="T:System.ComponentModel.DataAnnotations.ValidationAttribute" /> 
+            fails. The failed validation result will be returned. In other words, it will fail one at a time. 
+            </remarks>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.Attributes.HasNestedValidationAttribute.IsValid(System.Object,System.ComponentModel.DataAnnotations.ValidationContext)">
+            <summary>
+            Validates the specified value with respect to the current validation attribute.
+            </summary>
+            <param name="value">The value to validate.</param>
+            <param name="validationContext">The context information about the validation operation.</param>
+            <returns>
+            An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult"/> class.
+            </returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultFlowService.Validate(Midwolf.GamesFramework.Services.DefaultFlowService.CheckEventFlow)">
+            <summary>
+            Validate a flow object depending on its type. It will also check its success/fail events if any.
+            </summary>
+            <param name="flowEvent">This object contains the current event and its success/fail events if any plus any
+             references to the current object.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Midwolf.GamesFramework.Services.Interfaces.IErrorService`1">
+            <summary>
+            Error service interface can be setup to collect any type of Errors.
+            </summary>
+            <typeparam name="T">Type used for collecting errors.</typeparam>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.Models.ApiError.#ctor(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary)">
+            <summary>
+            Creates a new <see cref="T:Midwolf.GamesFramework.Services.Models.ApiError"/> from the result of a model binding attempt.
+            The first model binding error (if any) is placed in the <see cref="P:Midwolf.GamesFramework.Services.Models.ApiError.Detail"/> property.
+            </summary>
+            <param name="modelState"></param>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.Id">
+            <summary>
+            The Id of the Game.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.Title">
+            <summary>
+            Title of the game.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.Metadata">
+            <summary>
+            Metadata must be sent as a Json object.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.Created">
+            <summary>
+            Unix timestamp when the game was created.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.LastUpdated">
+            <summary>
+            Unix timestamp when the game was last updated.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.EntriesCount">
+            <summary>
+            Total entries for this game.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Game.PlayersCount">
+            <summary>
+            Total players added to this game.
+            </summary>
+        </member>
+    </members>
+</doc>

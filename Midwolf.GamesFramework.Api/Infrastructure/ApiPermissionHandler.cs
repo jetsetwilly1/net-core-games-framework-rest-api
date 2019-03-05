@@ -12,6 +12,8 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ApiMinimumRequirments apiRequirements)
         {
+            var succeed = false;
+
             foreach (var requirement in apiRequirements.Requirements)
             {
                 if (requirement.GetType() == typeof(PlayerMinimumRequirement))
@@ -19,6 +21,7 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
                     if (PlayerCheck(context.User, requirement as PlayerMinimumRequirement))
                     {
                         context.Succeed(apiRequirements);
+                        succeed = true;
                     }
                 }
                 else if (requirement.GetType() == typeof(UserMinimumRequirement))
@@ -26,9 +29,12 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
                     if (UserCheck(context.User, requirement as UserMinimumRequirement))
                     {
                         context.Succeed(apiRequirements);
+                        succeed = true;
                     }
                 }
             }
+
+            if(!succeed) context.Fail();
 
             //TODO: Use the following if targeting a version of
             //.NET Framework older than 4.6:

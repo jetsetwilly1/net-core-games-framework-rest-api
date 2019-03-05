@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +20,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Midwolf.GamesFramework.Api.Infrastructure;
 using Midwolf.GamesFramework.Services;
 using Midwolf.GamesFramework.Services.Interfaces;
 using Midwolf.GamesFramework.Services.Models;
 using Midwolf.GamesFramework.Services.Storage;
 using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Midwolf.GamesFramework.Api
 {
@@ -74,12 +83,6 @@ namespace Midwolf.GamesFramework.Api
                 options.UseLazyLoadingProxies();
             });
 
-            // using same database as the api
-            //services.AddDbContext<ApiIdentityDbContext>(options => {
-            //    options.UseMySQL(connString.Mysql);
-            //    options.UseLazyLoadingProxies();
-            //});
-
             // ===== Add Identity ========
             services.AddIdentity<ApiUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApiDbContext>()
@@ -92,6 +95,8 @@ namespace Midwolf.GamesFramework.Api
             services.AddMvc(options => {
 
                 //options.ModelBinderProviders.Insert(0, new EventBinderProvider());
+                //options.InputFormatters.Clear();
+                options.FormatterMappings.SetMediaTypeMappingForFormat("json", "application/json");
 
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .AddJsonOptions(opt =>
@@ -114,14 +119,29 @@ namespace Midwolf.GamesFramework.Api
                     Contact = new Contact() { Name = "Midwolf Solutions", Email = "support@midwolf.co.uk", Url = "www.solutions.midwolf.co.uk" }
                 });
 
+                c.ExampleFilters();
+
                 c.AddSecurityDefinition("Bearer", new ApiKeyScheme { In = "header", Description = "Please enter JWT with Bearer into field", Name = "Authorization", Type = "apiKey" });
                 c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> {
                     { "Bearer", Enumerable.Empty<string>() },
                 });
 
-                c.EnableAnnotations();
-            });
+                c.DocumentFilter<TagDescriptionsDocumentFilter>();
 
+                c.SchemaFilter<SwaggerIgnoreFilter>();
+
+                c.EnableAnnotations();
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower()}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+                var servicesXmlFile = "midwolf.gamesframework.services.xml";
+                var xmlservicesPath = Path.Combine(AppContext.BaseDirectory, servicesXmlFile);
+                c.IncludeXmlComments(xmlservicesPath);
+            });
+            // add the automatic examples for responses here...
+            services.AddSwaggerExamplesFromAssemblyOf<GameResponseExample>();
 
             services.AddAutoMapper(opt =>
             {
@@ -152,6 +172,35 @@ namespace Midwolf.GamesFramework.Api
                     ValidateAudience = false,
                     ValidateLifetime = false, // dont care about expiration dates..
                     RequireExpirationTime = false
+                };
+
+                // any exceptions thrown duting authentication are handled by jsonmiddleware..
+                x.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        // Override the response status code.
+                        context.Response.StatusCode = 401;
+
+                        // Emit the WWW-Authenticate header.
+                        context.Response.Headers.Append(
+                            HeaderNames.WWWAuthenticate,
+                            context.Options.Challenge);
+
+                        //if (!string.IsNullOrEmpty(context.Error))
+                        //{
+                        //    await context.Response.WriteAsync(context.Error);
+                        //}
+
+                        //if (!string.IsNullOrEmpty(context.ErrorDescription))
+                        //{
+                        //    await context.Response.WriteAsync(context.ErrorDescription);
+                        //}
+
+                        await context.Response.WriteAsync(JsonConvert.SerializeObject(new ApiError("Authentication Failed.")));
+
+                        context.HandleResponse();
+                    }
                 };
             });
 
@@ -235,6 +284,36 @@ namespace Midwolf.GamesFramework.Api
             var initialiseIndentDb = new IdentityDBInitialise();
             initialiseIndentDb.SeedData(app.ApplicationServices.GetService<UserManager<ApiUser>>(),
                 app.ApplicationServices.GetService<RoleManager<IdentityRole>>()).Wait();
+
+            //var mediaType = new MediaTypeHeaderValue("application/json");
+
+            //var formatter = new JsonMediaTypeFormatter();
+            //formatter.SupportedMediaTypes.Clear();
+            //formatter.SupportedMediaTypes.Add(mediaType);
+
+            //var config = new HttpConfiguration();
+            //config.Formatters.Clear();
+            //config.Formatters.Add(formatter);
+        }
+    }
+
+    public class TagDescriptionsDocumentFilter : IDocumentFilter
+    {
+        /// <summary>
+        /// Ive added this to make sure the controllers are in the correct order.
+        /// </summary>
+        /// <param name="swaggerDoc"></param>
+        /// <param name="context"></param>
+        public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
+        {
+            swaggerDoc.Tags = new[] {
+            new Tag { Name = "Games", Description = "Create your game container which will store information and maintain state of the game as its running." },
+            new Tag { Name = "Events", Description = "Once you have created your game container you will need to create your events." },
+            new Tag { Name = "Flow", Description = "With your game and events in place you need to create the flow." },
+            new Tag { Name = "Moderation", Description = "This resource allows you to moderate any moderation events within your game." },
+            new Tag { Name = "Players", Description = "A player must be created before adding an entry to your game." },
+            new Tag { Name = "Entries", Description = "Create entries to your game using your players and keep monitor there state." }
+        };
         }
     }
 

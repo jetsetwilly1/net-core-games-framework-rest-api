@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Midwolf.GamesFramework.Api.Infrastructure;
 using Midwolf.GamesFramework.Services.Interfaces;
 using Midwolf.GamesFramework.Services.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Midwolf.GamesFramework.Api.Controllers
 {

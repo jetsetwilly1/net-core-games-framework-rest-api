@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Midwolf.GamesFramework.Services.Attributes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ namespace Midwolf.GamesFramework.Services.Models
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore)]
         [DefaultValue("")]
+        [SwaggerIgnore]
         public string StackTrace { get; set; }
 
     }

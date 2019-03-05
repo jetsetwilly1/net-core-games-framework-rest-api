@@ -35,7 +35,7 @@ namespace Midwolf.GamesFramework.Services
 
             gameEntity.Created = date;
             gameEntity.LastUpdated = date;
-
+            
             // save to db
             await _context.Games.AddAsync(gameEntity);
 
