@@ -142,10 +142,10 @@ namespace Midwolf.GamesFramework.Services.Storage
             modelBuilder.Entity<ApiUser>().HasData(new ApiUser
             {
                 Id = "1",
-                Email = "stuart.elcocks@gmail.com",
+                Email = "stuart.elcocks@test.com",
                 EmailConfirmed = true,
-                NormalizedEmail = "STUART.ELCOCKS@GMAIL.COM",
-                UserName = "stuart.elcocks@gmail.com",
+                NormalizedEmail = "STUART.ELCOCKS@TEST.COM",
+                UserName = "stuart.elcocks@test.com",
                 FirstName = "Stuart",
                 LastName = "Elcocks"
             });
