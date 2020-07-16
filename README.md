@@ -1,20 +1,11 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+This is a rest based api written completely from scratch in .NET core using Swagger as it's interface.
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Initially written as part of a simple competition lottery based website it was never used in production but demonstrates my understanding and coding abilities.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+It uses the Swashbuckle package for generating the swagger ui and a MySQL database backend.  All backend services are interfaced and inherit from an IErrorService for handling any errors.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+It includes a secondary implementation Midwolf.Competitions.Api which has it's own implementation of some of the default backend services.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://www.visualstudio.com/en-us/docs/git/create-a-readme). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+Please ask me any questions about this. Especially if you are interested in using it.
+
