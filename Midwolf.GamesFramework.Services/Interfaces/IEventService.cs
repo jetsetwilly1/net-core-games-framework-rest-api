@@ -7,8 +7,10 @@ using Midwolf.GamesFramework.Services.Models.Db;
 
 namespace Midwolf.GamesFramework.Services.Interfaces
 {
-    public interface IEventService
+    public interface IEventService : IErrorService<Error>
     {
+        Task<bool> AdvanceEntriesForEvent(int gameId, int eventId);
+
         Task<bool> EventExists(int gameId, int eventId);
 
         Task<Event> AddEventAsync(int gameId, Event eventDto);

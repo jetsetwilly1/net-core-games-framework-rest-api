@@ -1,4 +1,5 @@
 ﻿using Midwolf.GamesFramework.Services.Models;
+using Midwolf.GamesFramework.Services.Models.Interfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Midwolf.GamesFramework.Services.Models
 {
-    public sealed class Game
+    public sealed class Game : IGame
     {
         public Game() { }
 

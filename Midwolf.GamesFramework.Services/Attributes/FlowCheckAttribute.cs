@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Midwolf.GamesFramework.Services.Attributes
 {
-    public class FlowCheckAttribute : ValidationAttribute
+    public class ChainCheckAttribute : ValidationAttribute
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
@@ -24,7 +24,7 @@ namespace Midwolf.GamesFramework.Services.Attributes
 
             var events = eventService.GetAllEventsAsync(gameId);
 
-            // TODO check the flow submitted and ensure it is correct.
+            // TODO check the Chain submitted and ensure it is correct.
             // now check the event has not alreasdy been submitted
             foreach (var e in events.Result)
             {

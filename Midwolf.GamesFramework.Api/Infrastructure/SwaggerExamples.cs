@@ -39,4 +39,47 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
             };
         }
     }
+
+    public class EventRequest
+    {
+        public string Type { get; set; }
+        public string Name { get; set; }
+        public double? StartDate { get; set; }
+        public double? EndDate { get; set; }
+        public IEventRules RuleSet { get; set; }
+    }
+
+    public class EventRequestExample : IExamplesProvider
+    {
+        public object GetExamples()
+        {
+            return new EventRequest
+            {
+                Type = "submission",
+                Name = "Submission event for game.",
+                StartDate = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds(),
+                EndDate = ((DateTimeOffset)DateTime.UtcNow.AddDays(1)).ToUnixTimeSeconds(),
+                RuleSet = new Submission
+                {
+                    Interval = Interval.Hour,
+                    NumberEntries = 5,
+                    NumberRefferals = 0
+                }
+            };
+        }
+    }
+
+    public class EventResponseExample : IExamplesProvider<Event>
+    {
+        public Event GetExamples()
+        {
+            return new Event
+            {
+                Name = "Moderate the entries.",
+                Type = "moderate",
+                StartDate = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds(),
+                EndDate = ((DateTimeOffset)DateTime.UtcNow.AddDays(1)).ToUnixTimeSeconds()
+            };
+        }
+    }
 }

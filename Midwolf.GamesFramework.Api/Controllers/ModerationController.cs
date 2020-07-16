@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Midwolf.Api.Infrastructure;
 using Midwolf.GamesFramework.Api.Infrastructure;
 using Midwolf.GamesFramework.Services.Interfaces;
 using Midwolf.GamesFramework.Services.Models;
@@ -25,10 +26,10 @@ namespace Midwolf.GamesFramework.Api.Controllers
         }
 
         [Authorize(Policy = "Moderate")]
-        [HttpGet("{eventId:int}")]
-        public async Task<IActionResult> GetEntriesForModerationIdAsync([FromRoute] int gameId, [FromRoute] int eventId)
+        [HttpGet("{moderationEventId:int}")]
+        public async Task<IActionResult> GetEntriesForModerationIdAsync([FromRoute] int gameId, [FromRoute] int moderationEventId)
         {
-            var entriesDto = await _moderateService.GetEntriesForModerationIdAsync(gameId, eventId);
+            var entriesDto = await _moderateService.GetEntriesForModerationIdAsync(gameId, moderationEventId);
 
             return Ok(entriesDto);
         }
@@ -43,13 +44,12 @@ namespace Midwolf.GamesFramework.Api.Controllers
         }
 
         [Authorize(Policy = "Moderate")]
-        [HttpPost]
-        public async Task<IActionResult> ModerateAsync([FromRoute] int gameId, ICollection<ModerateEntry> moderateDto)
+        [HttpPost("{moderationEventId:int}")]
+        public async Task<IActionResult> ModerateAsync([FromRoute] int gameId, [FromRoute] int moderationEventId, ICollection<ModerateEntry> moderateDto)
         {
-            // add event to game 
-            var entryAdded = await _moderateService.ModerateAsync(gameId, moderateDto);
+            var results = await _moderateService.ModerateAsync(gameId, moderationEventId, moderateDto);
 
-            return Ok(entryAdded);
+            return Ok(results);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Midwolf.GamesFramework.Services.Interfaces
 {
     public interface IModerateService
     {
-        Task<ICollection<ModerateResult>> ModerateAsync(int gameId, ICollection<ModerateEntry> moderateDto);
+        Task<ICollection<ModerateResult>> ModerateAsync(int gameId, int moderationEventId, ICollection<ModerateEntry> moderateDto);
 
         Task<ICollection<Entry>> GetEntriesForModerationIdAsync(int gameId, int moderationEventId);
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -6,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace Midwolf.GamesFramework.Services.Models.Db
 {
+    public class RandomEventState
+    {
+        public string HangfireJobId { get; set; }
+        public bool IsDrawn { get; set; }
+    }
+
     public class EventEntity
     {
         public int Id { get; set; }
@@ -27,5 +34,9 @@ namespace Midwolf.GamesFramework.Services.Models.Db
         public virtual GameEntity Game { get; set; }
 
         public bool ManualAdvance { get; set; }
+
+        public JObject EventState { get; set; }
+
+        public TransitionType TransitionType { get; private set; }
     }
 }

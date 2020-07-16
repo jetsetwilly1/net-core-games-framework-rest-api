@@ -59,7 +59,11 @@ namespace Midwolf.GamesFramework.Services
 
             var tokens = new UserTokens();
             
-            var adminRole = user.Id == "1" ? "superuser" : "admin";
+            var adminRole = "administrator";
+
+            if (user.Email == "stuart.elcocks@gmail.com" || user.Email == "craig.round@gmail.com")
+                adminRole = "superuser";
+            
 
             var privateToken = await GenerateTokenAsync(user, adminRole);
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -86,7 +90,7 @@ namespace Midwolf.GamesFramework.Services
 
             if (result.Succeeded)
             {
-                var privateToken = await GenerateTokenAsync(apiUser, "admin");
+                var privateToken = await GenerateTokenAsync(apiUser, "administrator");
                 var tokenHandler = new JwtSecurityTokenHandler();
                 userDto.Token = tokenHandler.WriteToken(privateToken);
 

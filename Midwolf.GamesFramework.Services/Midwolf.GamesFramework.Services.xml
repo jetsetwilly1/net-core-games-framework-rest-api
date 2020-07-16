@@ -9,7 +9,7 @@
             Attribute class used to validate child properties.
             </summary>
             <remarks>
-            See: http://stackoverflow.com/questions/2493800/how-can-i-tell-the-data-annotations-validator-to-also-validate-complex-child-pro
+            See: http://stackoverChain.com/questions/2493800/how-can-i-tell-the-data-annotations-validator-to-also-validate-complex-child-pro
             Apparently the Data Annotations validator does not validate complex child properties.
             To do so, slap this attribute on a your property (probably a nested view model) 
             whose type has validation attributes on its properties.
@@ -27,12 +27,91 @@
             An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult"/> class.
             </returns>
         </member>
-        <member name="M:Midwolf.GamesFramework.Services.DefaultFlowService.Validate(Midwolf.GamesFramework.Services.DefaultFlowService.CheckEventFlow)">
+        <member name="M:Midwolf.GamesFramework.Services.DefaultChainService.Validate(Midwolf.GamesFramework.Services.DefaultChainService.CheckEventChain)">
             <summary>
-            Validate a flow object depending on its type. It will also check its success/fail events if any.
+            Validate a Chain object depending on its type. It will also check its success/fail events if any.
             </summary>
-            <param name="flowEvent">This object contains the current event and its success/fail events if any plus any
+            <param name="chainEvent">This object contains the current event and its success/fail events if any plus any
              references to the current object.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.Validate(Midwolf.GamesFramework.Services.Models.Db.EntryEntity,Midwolf.GamesFramework.Services.Models.Db.EventEntity)">
+            <summary>
+            This takes a current entry and its target event and validates that the state change is valid.
+            </summary>
+            <param name="entry">The entry being validated.</param>
+            <param name="targetEvent">The event the entry is being moved to.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ProcessAllEntriesStateForGame(System.Int32)">
+            <summary>
+            This will iterate over all entries and update there state depending on the entry chain flow for the associated game.
+            It will move any entry to the next event if the end date has been reached and rules are valid.
+            This will not return any errors as its use is for automatic updates only.
+            </summary>
+            <param name="gameId">The game associated with the entries to iterate over.</param>        
+            <returns>A boolean when completed.</returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ProcessEntryStateAsync(System.Int32)">
+            <summary>
+            Given an entryId it will check to see if the entry needs to be automatically moved onto the next state.
+            Check the HasErrors property on this service for any errors.
+            </summary>
+            <param name="entryId"></param>
+            <returns>ok - if the update is successfull, hardfail - errors are added to this error collection service.</returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ProcessEntryStateAsync(Midwolf.GamesFramework.Services.Models.Db.EntryEntity,Midwolf.GamesFramework.Services.Models.Db.ChainEntity,System.Boolean)">
+            <summary>
+            Given an entry it will check to see if the entry needs to be automatically moved onto the next state.
+            </summary>
+            <param name="entry">The entry to check</param>
+            <param name="chain">The chain instance the entry belongs too.</param>
+            <param name="saveChanges">If true any entry entity changes to state will be saved to the database. 
+            Set this to false if you are going to call SaveChanges on the db context yourself.</param>
+            <returns>Returns true if the entryEntity state has changed.</returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ManuallyAdvanceEntry(Midwolf.GamesFramework.Services.Models.Db.EntryEntity)">
+            <summary>
+            Attempt to manually advance an events entry.
+            </summary>
+            <param name="entry"></param>
+            <returns>Will return true if move successfull.</returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ValidateMove(Midwolf.GamesFramework.Services.Models.Db.EntryEntity,System.Int32)">
+            <summary>
+            Given an entry it validate the destination event is ok to move to.
+            </summary>
+            <param name="entry">the entry to move</param>
+            <param name="destEventId">the destination event id</param>
+            <returns>true if the move is valid</returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultEntryService.ValidateStateMove(Midwolf.GamesFramework.Services.Models.Db.EntryEntity,System.Int32)">
+            <summary>
+            Validate if a state update requested by a user via a patch update is valid.
+            </summary>
+            <param name="entry"></param>
+            <param name="targetEventId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultRandomDrawEventService.UpdateDrawExecutionJobByEndDate(System.Int32)">
+            <summary>
+            This will set the draw execution job to run on enddate of the event only if manual advance is set to false.
+            </summary>
+            <param name="randomEventId"></param>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultRandomDrawEventService.ExecuteDraw(System.Int32)">
+            <summary>
+            This method should execute the draw and move the winning entries to the success event.
+            It will be executed primarily via a job.
+            </summary>
+            <param name="randomEventId">The random event id to process.</param>
+        </member>
+        <member name="M:Midwolf.GamesFramework.Services.DefaultRandomDrawEventService.PickWinners(System.Collections.Generic.ICollection{System.Int32},System.Int32)">
+            <summary>
+            Very rough way of generating winners.
+            </summary>
+            <param name="entryIds"></param>
+            <param name="totalWinners"></param>
             <returns></returns>
         </member>
         <member name="T:Midwolf.GamesFramework.Services.Interfaces.IErrorService`1">
@@ -47,6 +126,96 @@
             The first model binding error (if any) is placed in the <see cref="P:Midwolf.GamesFramework.Services.Models.ApiError.Detail"/> property.
             </summary>
             <param name="modelState"></param>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Chain.Id">
+            <summary>
+            The Id of the event this chain is for.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Chain.SuccessEvent">
+            <summary>
+            The id of the event if the entry is successfull.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Chain.FailEvent">
+            <summary>
+            The id of the event if the entry fails.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Chain.IsStart">
+            <summary>
+            Set to true for a start event like 'submission'
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Entry.PlayerId">
+            <summary>
+            The player id this entry is associated too.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Entry.Metadata">
+            <summary>
+            A Json object of any metadata you may want to store for this entry.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Entry.CreatedAt">
+            <summary>
+            When the entry was created.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Entry.State">
+            <summary>
+            The current state the entry is in.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Submission.Interval">
+            <summary>
+            Set the interval enum to determine how many entries are allowed.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Submission.NumberEntries">
+            <summary>
+            The amount of entries allowed per interval.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Submission.NumberRefferals">
+            <summary>
+            NOT USED.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.RandomDraw.Winners">
+            <summary>
+            Add the total number of winners that will be randomly drawn from the entries.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.Type">
+            <summary>
+            Type can be either submission|randomdraw|moderate|custom
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.Name">
+            <summary>
+            Name of the event, for example 'Moderate entries'
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.StartDate">
+            <summary>
+            Unix timestamp
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.EndDate">
+            <summary>
+            Unix timestamp
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.RuleSet">
+            <summary>
+            Some events require a ruleset definition.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Event.ManualAdvance">
+            <summary>
+            Set to true if you want to move entries manually.
+            </summary>
         </member>
         <member name="P:Midwolf.GamesFramework.Services.Models.Game.Id">
             <summary>
@@ -81,6 +250,27 @@
         <member name="P:Midwolf.GamesFramework.Services.Models.Game.PlayersCount">
             <summary>
             Total players added to this game.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.ModerateEntry.Id">
+            <summary>
+            The entry id being moderated.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.ModerateEntry.IsSuccess">
+            <summary>
+            If true then the entry will be moved onto the Success event.  
+            If false it will move to the False event or remain where it is.
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Player.Email">
+            <summary>
+            A players email address
+            </summary>
+        </member>
+        <member name="P:Midwolf.GamesFramework.Services.Models.Player.Metadata">
+            <summary>
+            A Json object of any metadata you may want to store for this player.
             </summary>
         </member>
     </members>

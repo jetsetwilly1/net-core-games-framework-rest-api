@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
+using Hangfire.MySql.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -21,7 +21,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Midwolf.Api.Infrastructure;
+using Midwolf.Competitions.Api.Infrastructure;
 using Midwolf.GamesFramework.Api.Infrastructure;
+using Midwolf.GamesFramework.CompetitionServices;
 using Midwolf.GamesFramework.Services;
 using Midwolf.GamesFramework.Services.Interfaces;
 using Midwolf.GamesFramework.Services.Models;
@@ -108,6 +111,10 @@ namespace Midwolf.GamesFramework.Api
                 });
 
 
+            services.AddHangfire(x => 
+            x.UseStorage(
+                new MySqlStorage(connString.Mysql, new MySqlStorageOptions() { TablePrefix = "hangfire" })));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
@@ -126,9 +133,18 @@ namespace Midwolf.GamesFramework.Api
                     { "Bearer", Enumerable.Empty<string>() },
                 });
 
+                c.DescribeAllEnumsAsStrings();
+
                 c.DocumentFilter<TagDescriptionsDocumentFilter>();
 
                 c.SchemaFilter<SwaggerIgnoreFilter>();
+
+                // for adding sub classes
+                c.DocumentFilter<PolymorphismDocumentFilter<IEventRules>>();
+                c.SchemaFilter<PolymorphismSchemaFilter<IEventRules>>();
+
+                // for removing unwanted models
+                c.DocumentFilter<SwaggerRemoveModelsDocumentFilter>();
 
                 c.EnableAnnotations();
                 // Set the comments path for the Swagger JSON and UI.
@@ -140,8 +156,10 @@ namespace Midwolf.GamesFramework.Api
                 var xmlservicesPath = Path.Combine(AppContext.BaseDirectory, servicesXmlFile);
                 c.IncludeXmlComments(xmlservicesPath);
             });
+
             // add the automatic examples for responses here...
             services.AddSwaggerExamplesFromAssemblyOf<GameResponseExample>();
+            services.AddSwaggerExamplesFromAssemblyOf<EventResponseExample>();
 
             services.AddAutoMapper(opt =>
             {
@@ -247,10 +265,11 @@ namespace Midwolf.GamesFramework.Api
             services.AddScoped<IUserService, DefaultUserService>();
             services.AddScoped<IGameService, DefaultGameService>();
             services.AddScoped<IEventService, DefaultEventService>();
-            services.AddScoped<IFlowService, DefaultFlowService>();
+            services.AddScoped<IChainService, DefaultChainService>();
             services.AddScoped<IPlayerService, DefaultPlayerService>();
             services.AddScoped<IEntryService, DefaultEntryService>();
             services.AddScoped<IModerateService, DefaultModerateService>();
+            services.AddScoped<IRandomDrawEventService, DefaultRandomDrawEventService>();
             services.AddSingleton<IAuthorizationHandler, ApiPermissionsHandler>();
         }
 
@@ -273,6 +292,23 @@ namespace Midwolf.GamesFramework.Api
 
             app.UseMvc();
             app.UseAuthentication();
+
+            var hangFireAuth = new DashboardOptions
+            {
+                Authorization = new[]
+                {
+                    new HangFireAuthorization(app.ApplicationServices.GetService<IAuthorizationService>(),
+                    app.ApplicationServices.GetService<IHttpContextAccessor>())
+                }
+            };
+
+            app.UseHangfireServer(
+                new BackgroundJobServerOptions
+                {
+                    WorkerCount = 1 // limit to 1 connection only.
+                });
+
+            app.UseHangfireDashboard("/hangfire", options: hangFireAuth);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -306,10 +342,15 @@ namespace Midwolf.GamesFramework.Api
         /// <param name="context"></param>
         public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
         {
+            var eventsDescription = "<p>Once you have created your game container you will need to create your events.</p>" + 
+                "<p>Events can be of type submission|moderate|randomdraw and each event must have a start and end date in unix" + 
+                " timestamp that doesn't clash. I.E. The events must follow in order.</p>" +
+                "<p>Once you have added your events to a game then you can put together your chain by using the chain endpoint.</p>";
+
             swaggerDoc.Tags = new[] {
             new Tag { Name = "Games", Description = "Create your game container which will store information and maintain state of the game as its running." },
-            new Tag { Name = "Events", Description = "Once you have created your game container you will need to create your events." },
-            new Tag { Name = "Flow", Description = "With your game and events in place you need to create the flow." },
+            new Tag { Name = "Events", Description = eventsDescription },
+            new Tag { Name = "Chain", Description = "With your game and events in place you need to create the Chain." },
             new Tag { Name = "Moderation", Description = "This resource allows you to moderate any moderation events within your game." },
             new Tag { Name = "Players", Description = "A player must be created before adding an entry to your game." },
             new Tag { Name = "Entries", Description = "Create entries to your game using your players and keep monitor there state." }
@@ -326,9 +367,9 @@ namespace Midwolf.GamesFramework.Api
     {
         private const string _superuserRoleName = "superuser";
         private string _superuserEmail = "stuart.elcocks@gmail.com";
-        private string _superuserPassword = "Passw0rd01!";
+        private string _superuserPassword = "Password01!";
 
-        private string[] _defaultRoles = new string[] { _superuserRoleName, "admin", "public", "apibasic", "registered", "administrate", "moderate", "judge" };
+        private string[] _defaultRoles = new string[] { _superuserRoleName, "administrator", "public", "apibasic", "registered", "administrate", "moderate", "judge" };
 
         private RoleManager<IdentityRole> _roleManager;
         private UserManager<ApiUser> _userManager;
@@ -367,7 +408,7 @@ namespace Midwolf.GamesFramework.Api
                             //await _roleManager.AddClaimAsync(roleIdentity, new Claim(CustomClaimTypes.Permission, "all.delete"));
                         }
 
-                        if (role == "admin")
+                        if (role == "administrator")
                         {
                             // now add role permissions
                             //await _roleManager.AddClaimAsync(roleIdentity, new Claim(CustomClaimTypes.Permission, "games.view"));
@@ -393,11 +434,30 @@ namespace Midwolf.GamesFramework.Api
         {
             var superUser = await _userManager.FindByEmailAsync(_superuserEmail);
 
-            if (superUser != null && string.IsNullOrEmpty(superUser.PasswordHash))
+            if (superUser != null)
             {
-                await _userManager.AddPasswordAsync(superUser, "Password01!");
+                await _userManager.AddPasswordAsync(superUser, _superuserPassword);
 
                 await _userManager.AddToRoleAsync(superUser, _superuserRoleName);
+            }
+            else
+            {
+                // create it
+                await _userManager.CreateAsync(new ApiUser
+                {
+                    Id = "1",
+                    Email = _superuserEmail,
+                    EmailConfirmed = true,
+                    UserName = _superuserEmail,
+                    FirstName = "Stuart",
+                    LastName = "Elcocks"
+                });
+
+                var user = await _userManager.FindByEmailAsync(_superuserEmail);
+
+                await _userManager.AddPasswordAsync(user, _superuserPassword);
+
+                await _userManager.AddToRoleAsync(user, _superuserRoleName);
             }
         }
     }

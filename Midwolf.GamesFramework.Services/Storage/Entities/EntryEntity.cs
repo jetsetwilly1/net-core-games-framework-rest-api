@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Midwolf.GamesFramework.Services.Models.Db
 {
@@ -11,12 +13,15 @@ namespace Midwolf.GamesFramework.Services.Models.Db
 
         public int PlayerId { get; set; }
 
-        public Dictionary<object,object> Metadata { get; set; }
+        public JObject Metadata { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public int State { get; set; }
 
         public int GameId { get; set; }
+
+        [ForeignKey("GameId")]
+        public virtual GameEntity Game { get; set; }
     }
 }

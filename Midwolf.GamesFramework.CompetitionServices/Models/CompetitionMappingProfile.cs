@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
+using Midwolf.GamesFramework.CompetitionServices.Models;
 using Midwolf.GamesFramework.Services.Models;
-using Midwolf.GamesFramework.Services.Models.CompetitionModels;
+using Midwolf.GamesFramework.Services.Models.Db;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Midwolf.GamesFramework.Services.CompetitionServices
 {
@@ -16,8 +15,14 @@ namespace Midwolf.GamesFramework.Services.CompetitionServices
         public CompetitionMappingProfile()
         {
             CreateMap<Competition, Game>()
-                .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => JObject.FromObject(src.MetaData)));
+                .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => JObject.FromObject(src.Metadata)))
+                .ReverseMap()
+                .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => src.Metadata.ToObject<CompetitionMetadata>()));
 
+            CreateMap<CompetitionEntry, Entry>()
+                .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => JObject.FromObject(src.Metadata)))
+                .ReverseMap()
+                .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => src.Metadata.ToObject<EntryMetadata>()));
         }
     }
 }

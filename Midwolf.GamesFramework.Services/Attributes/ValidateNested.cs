@@ -11,7 +11,7 @@ namespace Midwolf.GamesFramework.Services.Attributes
     /// Attribute class used to validate child properties.
     /// </summary>
     /// <remarks>
-    /// See: http://stackoverflow.com/questions/2493800/how-can-i-tell-the-data-annotations-validator-to-also-validate-complex-child-pro
+    /// See: http://stackoverChain.com/questions/2493800/how-can-i-tell-the-data-annotations-validator-to-also-validate-complex-child-pro
     /// Apparently the Data Annotations validator does not validate complex child properties.
     /// To do so, slap this attribute on a your property (probably a nested view model) 
     /// whose type has validation attributes on its properties.

@@ -78,6 +78,10 @@ namespace Midwolf.GamesFramework.Services.Storage
                 .WithMany(b => b.Entries)
                 .HasForeignKey(p => p.GameId);
 
+                entity.HasOne(p => p.Game)
+                .WithMany(b => b.Entries)
+                .HasForeignKey(p => p.GameId);
+
                 entity.HasOne<PlayerEntity>()
                 .WithMany(b => b.Entries)
                 .HasForeignKey(p => p.PlayerId);
@@ -85,7 +89,7 @@ namespace Midwolf.GamesFramework.Services.Storage
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.PlayerId).IsRequired();
                 entity.Property(e => e.Metadata).HasConversion(v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<Dictionary<object, object>>(v));
+                    v => JsonConvert.DeserializeObject<JObject>(v));
             });
 
             modelBuilder.Entity<PlayerEntity>(entity =>
@@ -97,7 +101,7 @@ namespace Midwolf.GamesFramework.Services.Storage
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).IsRequired();
                 entity.Property(e => e.Metadata).HasConversion(v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<Dictionary<object, object>>(v));
+                    v => JsonConvert.DeserializeObject<JObject>(v));
             });
 
             modelBuilder.Entity<GameEntity>(entity =>
@@ -110,8 +114,8 @@ namespace Midwolf.GamesFramework.Services.Storage
                 entity.Property(e => e.LastUpdated).IsRequired();
                 entity.Property(e => e.Metadata).HasConversion(v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<JObject>(v));
-                entity.Property(e => e.Flow).HasConversion(v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<List<FlowEntity>>(v));
+                entity.Property(e => e.Chain).HasConversion(v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<List<ChainEntity>>(v));
             });
 
             modelBuilder.Entity<EventEntity>(entity =>
@@ -126,12 +130,14 @@ namespace Midwolf.GamesFramework.Services.Storage
                 entity.Property(e => e.EndDate).IsRequired();
                 entity.Property(e => e.Type).IsRequired();
                 entity.Property(e => e.ManualAdvance).HasColumnType("TINYINT(1)");
+                entity.Property(e => e.TransitionType).HasConversion<string>();
+                entity.Property(e => e.EventState).HasConversion(v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject<JObject>(v));
                 //entity.Property(e => e.Rules).HasConversion(v => JsonConvert.SerializeObject(v),
                 //    v => JsonConvert.DeserializeObject<Dictionary<object, object>>(v)).IsRequired();
                 //entity.Property(e => e.RuleSet).HasConversion(v => JsonConvert.SerializeObject(v),
                 //    v => JsonConvert.DeserializeObject<EventRules>(v));
             });
-            
 
             modelBuilder.Entity<ApiUser>().HasData(new ApiUser
             {
@@ -151,11 +157,11 @@ namespace Midwolf.GamesFramework.Services.Storage
                 Title = "Test Game",
                 UserId = "1",
                 LastUpdated = DateTime.UtcNow,
-                Flow = new List<FlowEntity>()
+                Chain = new List<ChainEntity>()
                 {
-                    new FlowEntity{ Id = 100, IsStart = true, SuccessEvent = 101 },
-                    new FlowEntity{ Id = 101, SuccessEvent = 102 },
-                    new FlowEntity{ Id = 102 },
+                    new ChainEntity{ Id = 100, IsStart = true, SuccessEvent = 101 },
+                    new ChainEntity{ Id = 101, SuccessEvent = 102 },
+                    new ChainEntity{ Id = 102 },
                 }
             });
 
@@ -167,7 +173,7 @@ namespace Midwolf.GamesFramework.Services.Storage
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(1),
                 Type = "submission",
-                RuleSet = JsonConvert.SerializeObject(new Submission { Interval = "hour", NumberEntries = 10 })
+                RuleSet = JsonConvert.SerializeObject(new Submission { Interval = Interval.Hour, NumberEntries = 10 })
             });
 
             modelBuilder.Entity<EventEntity>().HasData(new EventEntity

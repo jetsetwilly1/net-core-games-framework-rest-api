@@ -20,5 +20,11 @@ namespace Midwolf.GamesFramework.Services.Interfaces
         Task<ICollection<Entry>> GetAllEntriesAsync(int gameId);
 
         Task<Entry> UpdateEntryAsync(Entry dto);
+
+        Task<bool> ProcessEntryStateAsync(int entryId);
+
+        Task<bool> ProcessAllEntriesStateForGame(int gameId);
+
+        Task<bool> ManuallyAdvanceEntry(EntryEntity entry);
     }
 }

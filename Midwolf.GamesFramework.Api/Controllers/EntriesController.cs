@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Midwolf.Api.Infrastructure;
 using Midwolf.GamesFramework.Api.Infrastructure;
 using Midwolf.GamesFramework.Services.Interfaces;
 using Midwolf.GamesFramework.Services.Models;

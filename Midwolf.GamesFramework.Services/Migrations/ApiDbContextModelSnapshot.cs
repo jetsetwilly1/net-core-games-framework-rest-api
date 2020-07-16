@@ -189,7 +189,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         {
                             Id = "1",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b0d08f60-4275-45ae-98a6-9ba236b9b18b",
+                            ConcurrencyStamp = "3d4602f7-6530-4483-9c17-a42cab591620",
                             Email = "stuart.elcocks@gmail.com",
                             EmailConfirmed = true,
                             FirstName = "Stuart",
@@ -229,7 +229,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 300,
-                            CreatedAt = new DateTime(2019, 3, 1, 22, 1, 6, 999, DateTimeKind.Utc).AddTicks(679),
+                            CreatedAt = new DateTime(2019, 3, 28, 13, 18, 34, 997, DateTimeKind.Utc).AddTicks(206),
                             GameId = 1,
                             PlayerId = 200,
                             State = 101
@@ -237,7 +237,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 301,
-                            CreatedAt = new DateTime(2019, 3, 1, 21, 55, 6, 999, DateTimeKind.Utc).AddTicks(1381),
+                            CreatedAt = new DateTime(2019, 3, 28, 13, 12, 34, 997, DateTimeKind.Utc).AddTicks(1070),
                             GameId = 1,
                             PlayerId = 200,
                             State = 101
@@ -245,7 +245,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 302,
-                            CreatedAt = new DateTime(2019, 3, 1, 21, 57, 6, 999, DateTimeKind.Utc).AddTicks(1398),
+                            CreatedAt = new DateTime(2019, 3, 28, 13, 14, 34, 997, DateTimeKind.Utc).AddTicks(1088),
                             GameId = 1,
                             PlayerId = 201,
                             State = 101
@@ -253,7 +253,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 303,
-                            CreatedAt = new DateTime(2019, 3, 1, 21, 59, 6, 999, DateTimeKind.Utc).AddTicks(1409),
+                            CreatedAt = new DateTime(2019, 3, 28, 13, 16, 34, 997, DateTimeKind.Utc).AddTicks(1095),
                             GameId = 1,
                             PlayerId = 200,
                             State = 101
@@ -267,6 +267,8 @@ namespace Midwolf.GamesFramework.Services.Migrations
 
                     b.Property<DateTime>("EndDate");
 
+                    b.Property<string>("EventState");
+
                     b.Property<int>("GameId");
 
                     b.Property<sbyte>("ManualAdvance")
@@ -278,6 +280,9 @@ namespace Midwolf.GamesFramework.Services.Migrations
                     b.Property<string>("RuleSet");
 
                     b.Property<DateTime>("StartDate");
+
+                    b.Property<string>("TransitionType")
+                        .IsRequired();
 
                     b.Property<string>("Type")
                         .IsRequired();
@@ -292,33 +297,36 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 100,
-                            EndDate = new DateTime(2019, 3, 2, 21, 53, 6, 964, DateTimeKind.Utc).AddTicks(8786),
+                            EndDate = new DateTime(2019, 3, 29, 13, 10, 34, 955, DateTimeKind.Utc).AddTicks(4840),
                             GameId = 1,
                             ManualAdvance = (sbyte)0,
                             Name = "Submission event",
-                            RuleSet = "{\"Interval\":\"hour\",\"NumberEntries\":10,\"NumberRefferals\":0}",
-                            StartDate = new DateTime(2019, 3, 1, 21, 53, 6, 964, DateTimeKind.Utc).AddTicks(8032),
+                            RuleSet = "{\"Interval\":3600,\"NumberEntries\":10,\"NumberRefferals\":0}",
+                            StartDate = new DateTime(2019, 3, 28, 13, 10, 34, 955, DateTimeKind.Utc).AddTicks(4198),
+                            TransitionType = "Timed",
                             Type = "submission"
                         },
                         new
                         {
                             Id = 101,
-                            EndDate = new DateTime(2019, 3, 4, 21, 53, 6, 997, DateTimeKind.Utc).AddTicks(6126),
+                            EndDate = new DateTime(2019, 3, 31, 13, 10, 34, 995, DateTimeKind.Utc).AddTicks(1303),
                             GameId = 1,
                             ManualAdvance = (sbyte)1,
                             Name = "Moderate event",
-                            StartDate = new DateTime(2019, 3, 3, 21, 53, 6, 997, DateTimeKind.Utc).AddTicks(6119),
+                            StartDate = new DateTime(2019, 3, 30, 13, 10, 34, 995, DateTimeKind.Utc).AddTicks(1296),
+                            TransitionType = "Timed",
                             Type = "moderate"
                         },
                         new
                         {
                             Id = 102,
-                            EndDate = new DateTime(2019, 3, 6, 21, 53, 6, 997, DateTimeKind.Utc).AddTicks(6729),
+                            EndDate = new DateTime(2019, 4, 2, 13, 10, 34, 995, DateTimeKind.Utc).AddTicks(2012),
                             GameId = 1,
                             ManualAdvance = (sbyte)0,
                             Name = "Random draw event",
                             RuleSet = "{\"Winners\":1}",
-                            StartDate = new DateTime(2019, 3, 5, 21, 53, 6, 997, DateTimeKind.Utc).AddTicks(6729),
+                            StartDate = new DateTime(2019, 4, 1, 13, 10, 34, 995, DateTimeKind.Utc).AddTicks(2012),
+                            TransitionType = "Timed",
                             Type = "randomdraw"
                         });
                 });
@@ -328,9 +336,9 @@ namespace Midwolf.GamesFramework.Services.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("Created");
+                    b.Property<string>("Chain");
 
-                    b.Property<string>("Flow");
+                    b.Property<DateTime>("Created");
 
                     b.Property<DateTime>("LastUpdated");
 
@@ -350,9 +358,9 @@ namespace Midwolf.GamesFramework.Services.Migrations
                         new
                         {
                             Id = 1,
-                            Created = new DateTime(2019, 3, 1, 21, 53, 6, 963, DateTimeKind.Utc).AddTicks(9672),
-                            Flow = "[{\"Id\":100,\"SuccessEvent\":101,\"FailEvent\":null,\"IsStart\":true},{\"Id\":101,\"SuccessEvent\":102,\"FailEvent\":null,\"IsStart\":false},{\"Id\":102,\"SuccessEvent\":null,\"FailEvent\":null,\"IsStart\":false}]",
-                            LastUpdated = new DateTime(2019, 3, 1, 21, 53, 6, 964, DateTimeKind.Utc).AddTicks(1435),
+                            Chain = "[{\"Id\":100,\"SuccessEvent\":101,\"FailEvent\":null,\"IsStart\":true},{\"Id\":101,\"SuccessEvent\":102,\"FailEvent\":null,\"IsStart\":false},{\"Id\":102,\"SuccessEvent\":null,\"FailEvent\":null,\"IsStart\":false}]",
+                            Created = new DateTime(2019, 3, 28, 13, 10, 34, 954, DateTimeKind.Utc).AddTicks(7428),
+                            LastUpdated = new DateTime(2019, 3, 28, 13, 10, 34, 954, DateTimeKind.Utc).AddTicks(8842),
                             Title = "Test Game",
                             UserId = "1"
                         });
@@ -444,7 +452,7 @@ namespace Midwolf.GamesFramework.Services.Migrations
 
             modelBuilder.Entity("Midwolf.GamesFramework.Services.Models.Db.EntryEntity", b =>
                 {
-                    b.HasOne("Midwolf.GamesFramework.Services.Models.Db.GameEntity")
+                    b.HasOne("Midwolf.GamesFramework.Services.Models.Db.GameEntity", "Game")
                         .WithMany("Entries")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);

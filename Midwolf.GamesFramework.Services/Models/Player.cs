@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,10 +11,16 @@ namespace Midwolf.GamesFramework.Services.Models
     {
         public int Id { get; set; }
 
+        /// <summary>
+        /// A players email address
+        /// </summary>
         [Required]
         [EmailAddress]
         public string Email { get; set; }
 
-        public Dictionary<object, object> Metadata { get; set; }
+        /// <summary>
+        /// A Json object of any metadata you may want to store for this player.
+        /// </summary>
+        public JObject Metadata { get; set; }
     }
 }

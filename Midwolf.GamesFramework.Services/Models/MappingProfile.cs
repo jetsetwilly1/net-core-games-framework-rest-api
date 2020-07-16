@@ -16,8 +16,10 @@ namespace Midwolf.GamesFramework.Services.Models
             //    .ReverseMap();
 
             CreateMap<Entry, EntryEntity>().ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds((long)src.CreatedAt).DateTime))
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => ((DateTimeOffset)src.CreatedAt).ToUnixTimeSeconds()));
 
             CreateMap<Player, PlayerEntity>().ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ReverseMap();
@@ -26,7 +28,7 @@ namespace Midwolf.GamesFramework.Services.Models
                 .ForMember(dest => dest.Created, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds((long)src.Created).DateTime))
                 .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds((long)src.LastUpdated).DateTime))
                 //.ForMember(dest => dest.EntriesCount, opt => opt.Ignore()) // ignore as this is readonly
-                //.ForMember(dest => dest.Flow, opt => opt.Ignore()) // ignore as this is readonly
+                //.ForMember(dest => dest.Chain, opt => opt.Ignore()) // ignore as this is readonly
                 //.ForMember(dest => dest.PlayersCount, opt => opt.Ignore()) // ignore as this is readonly
                 .ReverseMap()
                 .ForMember(dest => dest.EntriesCount, opt => opt.MapFrom(c => c.Entries.Count(x => x.State != -1))) // total entries count where state not equal to -1
@@ -38,12 +40,27 @@ namespace Midwolf.GamesFramework.Services.Models
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds((long)src.StartDate.Value).DateTime))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => DateTimeOffset.FromUnixTimeSeconds((long)src.EndDate.Value).DateTime))
                 .ForMember(d => d.RuleSet, o => o.MapFrom(s => JsonConvert.SerializeObject(s.RuleSet)))
+                .ForMember(d => d.TransitionType, o => o.MapFrom(s => GetEventTransitionType(s.Type)))
                 .ReverseMap()
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => ((DateTimeOffset)src.StartDate).ToUnixTimeSeconds()))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => ((DateTimeOffset)src.EndDate).ToUnixTimeSeconds()))
                 .ForMember(d => d.RuleSet, o => o.MapFrom(s => (IEventRules)JsonConvert.DeserializeObject(s.RuleSet, GetEventRulesetType(s.Type))));
 
-            CreateMap<Flow, FlowEntity>().ReverseMap();
+            CreateMap<Chain, ChainEntity>().ReverseMap();
+        }
+
+        private TransitionType GetEventTransitionType(string type)
+        {
+            // if any other action types are added them include them in here..
+            switch (type)
+            {
+                case "submission":
+                    return TransitionType.Action;
+                case "custom":
+                    return TransitionType.Holding;
+                default:
+                    return TransitionType.Timed;
+            }
         }
 
         private Type GetEventRulesetType(string type)
@@ -56,6 +73,8 @@ namespace Midwolf.GamesFramework.Services.Models
                     return typeof(Moderate);
                 case "randomdraw":
                     return typeof(RandomDraw);
+                case "custom":
+                    return typeof(Custom);
                 default:
                     throw new NotImplementedException(string.Format("Event ruleset type of {0} is not implemented.", type, type));
             }

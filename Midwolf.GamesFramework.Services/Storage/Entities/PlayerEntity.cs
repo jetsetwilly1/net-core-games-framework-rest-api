@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Midwolf.GamesFramework.Services.Models.Db
 
         public string Email { get; set; }
 
-        public Dictionary<object, object> Metadata { get; set; }
+        public JObject Metadata { get; set; }
 
         public int GameId { get; set; }
 

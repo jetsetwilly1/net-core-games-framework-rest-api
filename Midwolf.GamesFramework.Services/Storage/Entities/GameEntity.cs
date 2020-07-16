@@ -27,8 +27,8 @@ namespace Midwolf.GamesFramework.Services.Models.Db
         [InverseProperty("Game")]
         public virtual ICollection<EventEntity> Events { get; set; }
 
-        // json flow of the events
-        public virtual ICollection<FlowEntity> Flow { get; set; }
+        // json Chain of the events
+        public virtual ICollection<ChainEntity> Chain { get; set; }
 
         public string UserId { get; set; }
 

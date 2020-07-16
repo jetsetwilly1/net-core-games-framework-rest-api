@@ -59,20 +59,21 @@ namespace Midwolf.GamesFramework.Services
                 return null;
         }
 
-        public async Task<ICollection<ModerateResult>> ModerateAsync(int gameId, ICollection<ModerateEntry> moderateDto)
+        public async Task<ICollection<ModerateResult>> ModerateAsync(int gameId, int moderationEventId, ICollection<ModerateEntry> moderateDto)
         {
             var game = await _context.Games.SingleOrDefaultAsync(x => x.Id == gameId);
             
-            var flowWithEventType = from flow in game.Flow
-                        join evnt in game.Events
-                             on flow.Id equals evnt.Id
-                        select new
-                        {
-                            flow.Id,
-                            flow.SuccessEvent,
-                            flow.FailEvent,
-                            evnt.Type
-                        };
+            var ChainWithEventType = from Chain in game.Chain
+                                     join evnt in game.Events
+                                     on Chain.Id equals evnt.Id
+                                     where evnt.Id == moderationEventId
+                                     select new
+                                     {
+                                         Chain.Id,
+                                         Chain.SuccessEvent,
+                                         Chain.FailEvent,
+                                         evnt.Type
+                                     };
 
             var entriesList = new List<EntryEntity>();
             var results = new List<ModerateResult>();
@@ -82,31 +83,38 @@ namespace Midwolf.GamesFramework.Services
             {
                 var entry = game.Entries.Where(x => x.Id == modState.Id).FirstOrDefault();
 
-                var flowEvent = flowWithEventType.Where(x => x.Id == entry.State).FirstOrDefault();
-
-                if (flowEvent != null && flowEvent.Type == EventType.Moderate)
+                if (entry != null)
                 {
-                    if (entry != null)
+                    var ChainEvent = ChainWithEventType.Where(x => x.Id == entry.State).FirstOrDefault();
+
+                    if (ChainEvent != null && ChainEvent.Type == EventType.Moderate)
                     {
-                        if (modState.IsSuccess)
-                            entry.State = flowEvent.SuccessEvent.Value;
+                        if (entry != null)
+                        {
+                            if (modState.IsSuccess)
+                                entry.State = ChainEvent.SuccessEvent.Value;
+                            else
+                                entry.State = ChainEvent.FailEvent ?? -1;
+
+                            entriesList.Add(entry);
+
+
+
+                            results.Add(new ModerateResult { Id = entry.Id, State = (entry.State == -1) ? "Entry has been deactivated." : entry.State.ToString() });
+                        }
                         else
-                            entry.State = flowEvent.FailEvent ?? -1;
-
-                        entriesList.Add(entry);
-
-
-
-                        results.Add(new ModerateResult { Id = entry.Id, State = (entry.State == -1) ? "Entry has been deactivated." : entry.State.ToString() });
+                        {
+                            results.Add(new ModerateResult { Id = entry.Id, State = "Entry not in moderation event." });
+                        }
                     }
                     else
                     {
-                        results.Add(new ModerateResult { Id = entry.Id, State = "Entry not in moderation event."});
+                        results.Add(new ModerateResult { Id = entry.Id, State = "Entry not in moderation event." });
                     }
                 }
                 else
                 {
-                    results.Add(new ModerateResult { Id = entry.Id, State = "Entry not in moderation event." });
+                    results.Add(new ModerateResult { Id = modState.Id, State = "Entry not found." });
                 }
             }
 

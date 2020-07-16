@@ -26,6 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Midwolf.Api.Infrastructure\Midwolf.Api.Infrastructure.csproj" />
+    <ProjectReference Include="..\Midwolf.GamesFramework.CompetitionServices\Midwolf.GamesFramework.CompetitionServices.csproj" />
     <ProjectReference Include="..\Midwolf.GamesFramework.Services\Midwolf.GamesFramework.Services.csproj" />
   </ItemGroup>
 

@@ -9,3 +9,7 @@
 /Midwolf.GamesFramework.CompetitionServices/obj
 /Midwolf.GamesFramework.Services/bin/Debug/netcoreapp2.2
 /Midwolf.GamesFramework.Services/obj
+/Midwolf.Api.Infrastructure/bin/Debug/netcoreapp2.2
+/Midwolf.Api.Infrastructure/obj
+/Midwolf.Competitions.Api/bin/Debug/netcoreapp2.2
+/Midwolf.Competitions.Api/obj

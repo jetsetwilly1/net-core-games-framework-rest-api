@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Midwolf.GamesFramework.Services.Interfaces;
@@ -96,10 +97,10 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
             // check entries route
             if (controllerName == "Entries")
             {
+                var controllerService = context.HttpContext.RequestServices.GetService(typeof(IEntryService));
+
                 if (context.RouteData.Values.Keys.Contains("entryId"))
                 {
-                    var controllerService = context.HttpContext.RequestServices.GetService(typeof(IEntryService));
-
                     var paramId = Convert.ToInt32(context.RouteData.Values["entryId"]);
 
                     var entityExists = await ((IEntryService)controllerService).EntryExists(gameId, paramId);
@@ -109,10 +110,21 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
                         context.Result = new BadRequestObjectResult(new ApiError("Invalid Entry Id."));
                         return;
                     }
+
+                    // update this particular entry state..
+                    await ((IEntryService)controllerService).ProcessEntryStateAsync(paramId);
+
+                    // DO NOT AWAIT THIS CALL, ITS JUST GOING TO UPDATE THE REST OF THE ENTRIES SEPERATLY
+                    BackgroundJob.Enqueue(() => ((IEntryService)controllerService).ProcessAllEntriesStateForGame(gameId));
+                }
+                else
+                {
+                    // they must be getting all entries so run the update and await..
+                    await ((IEntryService)controllerService).ProcessAllEntriesStateForGame(gameId);
                 }
             }
 
-            if (controllerName == "Flow")
+            if (controllerName == "Chain")
             {
                 // simple check to confirm this game has events
                 var controllerService = context.HttpContext.RequestServices.GetService(typeof(IEventService));
@@ -121,8 +133,27 @@ namespace Midwolf.GamesFramework.Api.Infrastructure
 
                 if (events == null || (events != null && events.Count == 0))
                 {
-                    context.Result = new BadRequestObjectResult(new ApiError("Create events before adding the flow for this game."));
+                    context.Result = new BadRequestObjectResult(new ApiError("Create events before adding the Chain for this game."));
                     return;
+                }
+            }
+
+            if (controllerName == "Moderation")
+            {
+                // simple check to confirm this game has events
+                var controllerService = context.HttpContext.RequestServices.GetService(typeof(IEventService));
+
+                if (context.RouteData.Values.Keys.Contains("moderationEventId"))
+                {
+                    var paramId = Convert.ToInt32(context.RouteData.Values["moderationEventId"]);
+
+                    var entityExists = await ((IEventService)controllerService).EventExists(gameId, paramId);
+
+                    if (!entityExists)
+                    {
+                        context.Result = new BadRequestObjectResult(new ApiError("Cannot find moderate event."));
+                        return;
+                    }
                 }
             }
 

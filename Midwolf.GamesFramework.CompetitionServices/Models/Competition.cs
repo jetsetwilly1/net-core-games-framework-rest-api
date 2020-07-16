@@ -1,26 +1,76 @@
-﻿using System;
+﻿using Midwolf.GamesFramework.Services.Attributes;
+using Midwolf.GamesFramework.Services.Models.Interfaces;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Midwolf.GamesFramework.Services.Models.CompetitionModels
+namespace Midwolf.GamesFramework.CompetitionServices.Models
 {
-    public class Competition
+    public enum CompetitionState
     {
-        public string Title { get; set; }
-
-        public CompetitionData MetaData { get; set; }
+        Running,
+        SoldOut,
+        Drawn,
+        Expired
     }
 
-    public class CompetitionData
+    public class Competition : IGame
     {
-        public string State { get; set; } // running, expired
-        public int TotalNumbers { get; set; }
-        public int TotalWinners { get; set; }
+        public Competition() { }
 
-        public int EntryExpiryInMinutes { get; set; } // this is used to set entries expiry times.
+        public Competition(double createdTimestamp, double lastupdatedTimestamp, int entriesCount, int playersCount)
+        {
+            // used to set private properties primarily for swagger examples.
+            Created = createdTimestamp;
+            LastUpdated = lastupdatedTimestamp;
+            EntriesCount = entriesCount;
+            PlayersCount = playersCount;
+        }
 
+        public int Id { get; private set; }
+
+        public string Title { get; set; }
+
+        [HasNestedValidation]
+        public CompetitionMetadata Metadata { get; set; }
+
+        public double Created { get; private set; }
+
+        public double LastUpdated { get; private set; }
+
+        public int EntriesCount { get; private set; }
+
+        public int PlayersCount { get; private set; }
+
+        [JsonIgnore]
+        public int UserId { get; set; }
+    }
+
+    public class CompetitionMetadata
+    {
+        [ReadOnly(true)]
+        public TicketsState TicketsState { get; private set; }
+
+        [Required]
+        public CompetitionState? State { get; set; } // running, expired
+        [Required]
+        public int? TotalNumbers { get; set; }
+        [Required]
+        public int? TotalWinners { get; set; }
+        [Required]
+        public int? EntryExpiryInSeconds { get; set; } // this is used to set entries expiry times.
+
+        [Required]
+        [HasNestedValidation]
         public CompetitionDetails Competition { get; set; }
+
+        public void SetTicketState(TicketsState ticketState)
+        {
+            TicketsState = ticketState;
+        }
     }
 
     public class CompetitionDetails
@@ -40,7 +90,7 @@ namespace Midwolf.GamesFramework.Services.Models.CompetitionModels
         public string MainImageUrl { get; set; } // this is the 1000w by 750h image.
 
         [Required(ErrorMessage = "Please include the player id for this entry.")]
-        public string PrizeDetails { get; set; } // this is product information
+        public Dictionary<string, ICollection<string>> PrizeSpecifications { get; set; } // this is product information
 
         public ICollection<CompetitionImage> ImageUrls { get; set; }
     }
@@ -50,7 +100,7 @@ namespace Midwolf.GamesFramework.Services.Models.CompetitionModels
         public string LargeImageUrl { get; set; }
         public string ThumbnailImageUrl { get; set; }
     }
-
+    
     public class TicketsState
     {
         public int TotalSold { get; set; }

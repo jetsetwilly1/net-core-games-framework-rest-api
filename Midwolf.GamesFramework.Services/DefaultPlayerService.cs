@@ -70,7 +70,7 @@ namespace Midwolf.GamesFramework.Services
 
             if (game != null)
             {
-                if (game.Players.Where(x => x.Email.ToLower() == playerDto.Email.ToLower()).Count() > 0)
+                if (game.Players.Where(x => x.Email.ToLower().Trim() == playerDto.Email.ToLower().Trim()).Count() > 0)
                 {
                     // email already exists
                     AddErrorToCollection(new Error { Key = "Player", Message = "Player with this email already exists for this game." });
